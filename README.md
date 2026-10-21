@@ -38,28 +38,15 @@ The repository currently supports:
 - Draft 2020-12 JSON Schemas for policies, evidence, and reports
 - Required provenance binding evidence to code, model, run, source, and collection time
 
-## Try it
+## Try it: evaluate decision outputs
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or newer.
-
-```bash
-uv sync --extra dev
-
-uv run zanshin-proof evaluate \
-  --policy examples/recommendation/policy.yml \
-  --evidence examples/recommendation/evidence.json \
-  --output proof-report.json
-```
-
-The example passes its required gates and surfaces catalog coverage as a warning. The command
-returns `0` for `pass` or `warn`, `1` when a required check blocks release, and `2` for invalid
-policy or evidence input.
-
-Use `uv run pytest`, `uv run ruff check .`, and `uv build` for verification and packaging.
-
-## Calibrated-decision demonstration
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or newer. From a terminal:
 
 ```bash
+git clone https://github.com/zanshin-ai/zanshin-proof.git
+cd zanshin-proof
+uv sync --extra dev --locked
+
 uv run python examples/calibrated-decisions/make_demo.py --decisions > /tmp/decisions.json
 uv run zanshin-proof evaluate \
   --policy examples/calibrated-decisions/policy.yml \
@@ -68,10 +55,29 @@ uv run zanshin-proof evaluate \
   --output /tmp/decision-report.json
 ```
 
-This exercises required calibration, Brier score, accuracy regression, selective error,
-coverage, sample count, and latency gates. Proof computes the metrics from synthetic
-labeled records; this is not a Jev benchmark or release evidence. See the
-[input contract and metric definitions](docs/decision-records.md).
+Expected: `pass`, nine passing checks, exit code `0`. Proof computes metrics from 100
+synthetic labeled records: accuracy `0.99`, Brier score approximately `0.0099`, ECE `0`,
+coverage `1`, selective error `0.01`, and p95 latency `180` ms. These demonstrate the
+calculation, not real model performance.
+
+Follow the [working example walkthrough](docs/working-example.md) to inspect the output,
+make a required gate fail, and adapt the input to your own model. The
+[decision-record contract](docs/decision-records.md) defines every metric and input field.
+
+## Evaluate precomputed evidence
+
+From the same checkout:
+
+```bash
+uv run zanshin-proof evaluate \
+  --policy examples/recommendation/policy.yml \
+  --evidence examples/recommendation/evidence.json \
+  --output /tmp/recommendation-report.json
+```
+
+This older example returns `warn` for catalog coverage with exit code `0`. Exit code `1`
+means a required check blocks release; `2` means invalid input or an output-write error.
+Use `uv run pytest`, `uv run ruff check .`, and `uv build` for verification and packaging.
 
 ## Policy example
 
