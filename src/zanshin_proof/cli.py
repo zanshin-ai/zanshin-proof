@@ -28,7 +28,7 @@ def _load_evidence(path: str | Path) -> dict[str, Any]:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="zanshin-proof",
-        description="Evaluate ML evidence against an explicit release policy.",
+        description="Evaluate calibrated-decision and ML evidence against a release policy.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     evaluate_parser = subparsers.add_parser("evaluate", help="evaluate an evidence document")

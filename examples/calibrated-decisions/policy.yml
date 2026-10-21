@@ -1,0 +1,40 @@
+version: 1
+project: calibrated-decision-routing
+
+# Illustrative thresholds, not production defaults. All checks are required.
+checks:
+  - id: typed-output-contract
+    type: boolean
+    path: facts.typed_output_valid
+  - id: held-out-evaluation
+    type: boolean
+    path: facts.held_out_evaluation
+  - id: minimum-evaluation-size
+    type: min_value
+    path: metrics.candidate.sample_count
+    minimum: 100
+  - id: calibration-error
+    type: max_value
+    path: metrics.candidate.ece
+    maximum: 0.05
+  - id: brier-score
+    type: max_value
+    path: metrics.candidate.brier
+    maximum: 0.10
+  - id: decision-accuracy-regression
+    type: metric_regression
+    candidate: metrics.candidate.accuracy
+    baseline: metrics.baseline.accuracy
+    tolerance: 0.01
+  - id: automated-decision-error
+    type: max_value
+    path: metrics.candidate.selective_error
+    maximum: 0.02
+  - id: automation-coverage
+    type: min_value
+    path: metrics.candidate.coverage
+    minimum: 0.50
+  - id: decision-latency
+    type: max_value
+    path: metrics.candidate.p95_latency_ms
+    maximum: 500
