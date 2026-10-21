@@ -4,7 +4,7 @@ from zanshin_proof.schema import load_schema, validate_document
 
 
 def test_public_schemas_are_valid_draft_2020_12() -> None:
-    for name in ("policy", "evidence", "report"):
+    for name in ("policy", "evidence", "report", "decisions"):
         Draft202012Validator.check_schema(load_schema(name))
 
 

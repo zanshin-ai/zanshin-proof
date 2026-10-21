@@ -20,7 +20,7 @@ def load_schema(name: str) -> dict[str, Any]:
 
 
 def validate_document(document: Any, schema_name: str) -> None:
-    schemas = {name: load_schema(name) for name in ("policy", "evidence", "report")}
+    schemas = {name: load_schema(name) for name in ("policy", "evidence", "report", "decisions")}
     registry = Registry().with_resources(
         (schema["$id"], Resource.from_contents(schema)) for schema in schemas.values()
     )

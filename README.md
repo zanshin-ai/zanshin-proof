@@ -12,10 +12,11 @@ Agents can help create code and collect evidence, but they do not approve their 
 
 Use Proof to gate a classifier, model router, or agent decision layer on evidence of
 calibration, decision quality, automation coverage, and latency. Models supply predictions;
-external evaluators supply measurements; explicit policy determines the verdict.
+collectors supply observed labels; Proof computes metrics and applies explicit policy.
 
 Proof is an evaluation and release-gating tool for RLCD-based systems. It does not train
-RLCD models, calculate metrics from predictions, or provide a live Jev integration.
+RLCD models or provide a live Jev integration. Binary labeled outputs can be evaluated
+directly; precomputed ML evidence is also supported.
 Existing ML release policies remain supported.
 
 See [Proof for calibrated decisions](docs/calibrated-decisions.md) for the evidence contract,
@@ -28,6 +29,8 @@ The repository currently supports:
 - Versioned YAML release policies
 - Required and optional checks
 - Boolean assertions, regression tolerances, and numeric thresholds
+- Binary decision metrics: Brier score, top-label ECE, accuracy, selective error, coverage
+- Optional paired baseline metrics, latency p95, and inspectable calibration bins
 - Machine-readable JSON reports
 - CI-safe exit codes
 - A calibrated-decision policy with a runnable, explicitly synthetic demonstration
@@ -57,16 +60,18 @@ Use `uv run pytest`, `uv run ruff check .`, and `uv build` for verification and 
 ## Calibrated-decision demonstration
 
 ```bash
-uv run python examples/calibrated-decisions/make_demo.py > /tmp/decision-evidence.json
+uv run python examples/calibrated-decisions/make_demo.py --decisions > /tmp/decisions.json
 uv run zanshin-proof evaluate \
   --policy examples/calibrated-decisions/policy.yml \
-  --evidence /tmp/decision-evidence.json \
+  --decisions /tmp/decisions.json \
+  --evidence-output /tmp/decision-evidence.json \
   --output /tmp/decision-report.json
 ```
 
 This exercises required calibration, Brier score, accuracy regression, selective error,
-coverage, sample count, and latency gates. All values are synthetic; this is not a Jev
-benchmark or release evidence. See the [metric definitions](docs/calibrated-decisions.md).
+coverage, sample count, and latency gates. Proof computes the metrics from synthetic
+labeled records; this is not a Jev benchmark or release evidence. See the
+[input contract and metric definitions](docs/decision-records.md).
 
 ## Policy example
 
@@ -112,7 +117,7 @@ schemas are packaged under `src/zanshin_proof/schemas/` and enforced at runtime.
 
 ## Near-term roadmap
 
-1. Decision-record contract and deterministic calibration / selective-risk metrics
+1. Multiclass metrics, evaluation slices, and uncertainty bounds
 2. Optional Jev and LangChain evidence collectors
 3. Signed evidence bundles and GitHub pull-request checks
 4. MLflow and Databricks provenance collectors
