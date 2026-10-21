@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Zanshin Proof converts explicit release policy and observed ML evidence into a deterministic,
-auditable verdict. It does not generate evidence and it does not replace human approval.
+Zanshin Proof converts explicit release policy and observed calibrated-decision or ML evidence
+into a deterministic, auditable verdict. It does not generate evidence and it does not replace human approval.
 
 ## Current boundary
 
-The first vertical slice has four parts:
+The first vertical slice has five parts:
 
 1. A versioned YAML policy describes required and optional checks.
 2. A JSON evidence document contains facts, metrics, and mandatory provenance.
@@ -36,3 +36,11 @@ it. This preserves the boundary between observed input and evaluator output.
 - Approval identities and separation-of-duties rules
 - Signed evidence bundles and immutable audit storage
 - Pull-request check reporting and a human review UI
+
+## Calibrated decision systems
+
+The same policy engine can gate RLCD-based decision systems on externally computed
+calibration, selective error, coverage, and latency metrics. No model participates in
+policy evaluation. Collectors and metric computation remain separate future components;
+the current schemas and existing ML policies are unchanged. See the
+[decision evidence contract](calibrated-decisions.md) for definitions and limitations.

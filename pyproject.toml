@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "zanshin-proof"
 version = "0.1.0"
-description = "Evidence gates for agent-assisted machine learning changes"
+description = "Evidence gates for calibrated AI decisions"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
