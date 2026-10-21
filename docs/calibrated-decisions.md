@@ -2,8 +2,8 @@
 
 Zanshin Proof is an evidence and release-gating tool for systems that make typed,
 probabilistic decisions, including models trained with Reinforcement Learning for
-Calibrated Decisions (RLCD). It evaluates supplied evidence; it does not implement
-RLCD training, calculate calibration metrics, or call a model provider.
+Calibrated Decisions (RLCD). It computes binary decision metrics and evaluates supplied evidence; it does not implement
+RLCD training or call a model provider.
 
 ## Why this direction
 
@@ -22,11 +22,12 @@ These articles motivate this use case; they do not specify a reproducible RLCD t
 1. Define the question, allowed answers, outcome labels, and the workflow's error costs.
 2. Freeze the candidate, baseline, question definitions, routing thresholds, and evaluation set.
 3. An external evaluator collects probabilities, independent labels, decisions, and timing.
-4. That evaluator calculates metrics and exports a version 1 evidence document.
+4. Proof computes metrics from version 1 binary decision records, or accepts externally
+   computed metrics as a version 1 evidence document.
 5. Proof applies a versioned policy and emits a deterministic pass, warn, or fail report.
 6. A human-owned release process decides promotion. Runtime code handles routing and abstention.
 
-Proof currently implements step 5. It can gate evidence from Jev, other classifiers,
+Proof currently implements steps 4 and 5 for binary decisions. It can gate evidence from Jev, other classifiers,
 or conventional ML models without a provider dependency. It does not currently collect
 Jev responses, intercept tool calls, enforce runtime abstention, or train models.
 
@@ -36,7 +37,7 @@ The [example policy](../examples/calibrated-decisions/policy.yml) uses existing 
 types and the existing evidence schema. Its thresholds illustrate a policy; choose and
 validate your own before evaluating a candidate.
 
-| Evidence path under `metrics.candidate` | External evaluator's definition |
+| Evidence path under `metrics.candidate` | Metric definition |
 | --- | --- |
 | `sample_count` | Number of independently labeled held-out decisions |
 | `accuracy` | Correct argmax decisions divided by all labeled decisions |
@@ -53,8 +54,12 @@ The example is binary; do not mix binary and multiclass Brier conventions.
 
 Gate selective error together with coverage so abstaining on every decision cannot pass.
 If no decisions are automated, selective error is undefined: omit it and let the required
-check block. Do not substitute zero. Supply finite, valid metric values; the current
-engine checks supplied values against policy thresholds, not their derivation or statistical validity.
+check block. Do not substitute zero. The decision adapter implements this behavior and rejects
+invalid records. Precomputed evidence still relies on the external evaluator for metric
+derivation. Neither path establishes statistical validity or label authenticity.
+
+See the [decision-record contract](decision-records.md) for the direct computation command,
+exact binning, tie handling, latency conventions, and paired baseline support.
 
 Aggregate metrics are insufficient for production assurance. Add required checks for
 critical slices, harmful false negatives, minimum automated sample counts, and uncertainty
@@ -88,10 +93,9 @@ shape, not authenticity or whether synthetic evidence is suitable for release.
 
 ## Next increments
 
-- A versioned decision-record format for probabilities, labels, abstentions, and outcomes.
-- Deterministic metric computation with documented binning, slices, and sample counts.
+- Multiclass decision records, evaluation slices, and uncertainty bounds.
 - Optional Jev / LangChain collectors preserving question definitions and model versions.
-- Candidate-versus-baseline comparison of calibration, decision risk, cost, and latency.
+- Cost metrics and paired baseline latency (paired calibration and risk metrics are supported).
 - Signed evidence and CI reporting, followed by explicit human approval controls.
 
 These are planned capabilities, not current integrations. RLCD training and reward design

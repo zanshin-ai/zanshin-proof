@@ -3,14 +3,15 @@
 ## Purpose
 
 Zanshin Proof converts explicit release policy and observed calibrated-decision or ML evidence
-into a deterministic, auditable verdict. It does not generate evidence and it does not replace human approval.
+into a deterministic, auditable verdict. It computes metrics from supplied binary decision records and does not replace human approval.
 
 ## Current boundary
 
 The first vertical slice has five parts:
 
 1. A versioned YAML policy describes required and optional checks.
-2. A JSON evidence document contains facts, metrics, and mandatory provenance.
+2. Input is either a JSON evidence document or versioned labeled binary decision records.
+   The decision adapter validates records and computes metrics into evidence v1.
 3. Draft 2020-12 JSON Schemas validate policy and evidence before checks run.
 4. A deterministic engine evaluates each check without model judgment.
 5. The CLI validates and emits a JSON report with the original provenance attached.
@@ -26,8 +27,9 @@ collection time, and at least one versioned source. Passing schema validation pr
 claims are present and well-formed; it does not prove that they are true. Future collectors and
 signatures will establish authenticity and bind the claims to their producing systems.
 
-The report copies provenance from the validated evidence rather than reconstructing or enriching
-it. This preserves the boundary between observed input and evaluator output.
+The decision adapter and report copy supplied provenance rather than reconstructing or enriching
+it. Computed evidence records the method, settings, and canonical input hash under
+`metrics.computation`; it does not fabricate collector or model identifiers. This preserves the boundary between observed input and evaluator output.
 
 ## Planned seams
 
@@ -39,8 +41,8 @@ it. This preserves the boundary between observed input and evaluator output.
 
 ## Calibrated decision systems
 
-The same policy engine can gate RLCD-based decision systems on externally computed
+The same policy engine can gate RLCD-based decision systems on computed or externally supplied
 calibration, selective error, coverage, and latency metrics. No model participates in
-policy evaluation. Collectors and metric computation remain separate future components;
-the current schemas and existing ML policies are unchanged. See the
+policy evaluation. The binary decision adapter is a separate deterministic component; live provider collectors
+remain future work. The existing evidence, report, and policy schemas are unchanged. See the
 [decision evidence contract](calibrated-decisions.md) for definitions and limitations.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import subprocess
@@ -48,5 +49,24 @@ def make_demo() -> dict:
     }
 
 
+def make_decisions() -> dict:
+    evidence = make_demo()
+    # Exactly 99/100 correct at confidence .99: calibrated synthetic observations.
+    return {
+        "version": 1,
+        "provenance": evidence["provenance"],
+        "facts": evidence["facts"],
+        "evaluation": {"bin_count": 10, "automation_threshold": 0.9},
+        "records": [
+            {"id": str(i), "probability": 0.99, "label": int(i != 0),
+             "baseline_probability": 0.95, "latency_ms": 180}
+            for i in range(100)
+        ],
+    }
+
+
 if __name__ == "__main__":
-    print(json.dumps(make_demo(), indent=2))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--decisions", action="store_true", help="emit labeled decision records")
+    args = parser.parse_args()
+    print(json.dumps(make_decisions() if args.decisions else make_demo(), indent=2))
