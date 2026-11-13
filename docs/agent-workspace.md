@@ -79,8 +79,7 @@ database on durable local storage and back it up through your normal process if 
 
 ## Product direction
 
-LumI's lifecycle approach is an inspiration. Proof's first workspace concentrates on evaluation
-history and release evidence. No LumI source code, visual assets, or branding is copied.
+Proof's first workspace concentrates on evaluation history and release evidence.
 
 | Capability | Current implementation | Next boundary |
 | --- | --- | --- |
