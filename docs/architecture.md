@@ -7,7 +7,7 @@ into a deterministic, auditable verdict. It computes metrics from supplied binar
 
 ## Current boundary
 
-The first vertical slice has five parts:
+Evaluation has five parts:
 
 1. A versioned YAML policy describes required and optional checks.
 2. Input is either a JSON evidence document or versioned labeled binary decision records.
@@ -26,8 +26,9 @@ CLI inspection and comparison return JSON. An offline HTML export supplies a vis
 workspace, built from the stored records with no external assets or runtime server. It is a
 snapshot, not a live multi-user app. See [the workspace guide](agent-workspace.md).
 
-Exit code `0` means the release is not blocked, `1` means required evidence failed, and `2`
-means the input could not be safely interpreted.
+For `evaluate`, exit code `0` means pass or warn, `1` means a required check failed or errored,
+and `2` means invalid input or an operation failure. Read and export commands return `0` on
+successful retrieval/export, regardless of saved verdicts, and `2` on an operation failure.
 
 ## Trust model
 
@@ -47,7 +48,7 @@ it. Computed evidence records the method, settings, and canonical input hash und
 - Schema migrations beyond version 1
 - Approval identities and separation-of-duties rules
 - Signed evidence bundles and immutable audit storage
-- Pull-request check reporting and a human review UI
+- Pull-request check reporting and authenticated review workflows
 - Training/external tracker adapters, model registry and deployment integration, monitoring
 
 ## Calibrated decision systems

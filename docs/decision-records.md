@@ -88,13 +88,15 @@ uv run zanshin-proof evaluate \
 ```
 
 The example uses synthetic records and makes no provider call. All required gates pass.
-Without `--decisions`, the example generator retains its earlier precomputed fixture mode.
+Omit `--decisions` from the generator to emit precomputed synthetic evidence instead.
 
 `--evidence` and `--decisions` are mutually exclusive. `--evidence-output` is optional and
 requires `--decisions`; it saves computed metrics and calibration bins as ordinary evidence
 v1, which can be passed back into `evaluate --evidence`. The report format is unchanged:
-it contains policy check observations and provenance. Save computed evidence to retain
-metrics that the policy does not reference.
+it contains policy check observations and provenance. Use `--evidence-output` to save all computed
+metrics, including those the policy does not reference. Adding `--store .proof/runs.db` to
+`evaluate` also retains the full computed evidence in a workspace snapshot for later inspection
+and comparison; see the [workspace guide](agent-workspace.md).
 
 Input provenance and facts are copied unchanged. `metrics.computation` records the
 `binary-decisions-v1` method, bin count, threshold, and SHA-256 of the input serialized with
@@ -114,3 +116,4 @@ Binary, unweighted, fully labeled records only. This implementation does not pro
 multiclass scoring, slice analysis, confidence intervals, provider adapters, or signed
 provenance. Low aggregate ECE is not a guarantee of correctness or safety. Keep sample-size,
 automated-count, coverage, and task-specific error checks in the release policy.
+
