@@ -22,6 +22,14 @@ jobs:
       - run: uv run --no-sync ruff check .
       - run: uv run --no-sync pytest
       - run: uv build
+      - name: Verify packaged workspace assets
+        run: >-
+          uv run --no-sync python -c
+          "import glob, zipfile;
+          wheel = zipfile.ZipFile(glob.glob('dist/*.whl')[0]);
+          assert 'zanshin_proof/workspace.html' in wheel.namelist()"
+      - name: Generate synthetic review workspace
+        run: uv run --no-sync python examples/workspace/make_demo.py
       - name: Evaluate example evidence
         run: >-
           uv run --no-sync zanshin-proof evaluate
@@ -31,4 +39,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: proof-report
-          path: proof-report.json
+          path: |
+            proof-report.json
+            proof-workspace.html
+

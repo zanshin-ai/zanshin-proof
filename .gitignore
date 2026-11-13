@@ -7,3 +7,6 @@ __pycache__/
 dist/
 build/
 proof-report.json
+.proof/
+proof-workspace.html
+

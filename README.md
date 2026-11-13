@@ -1,6 +1,85 @@
+<p align="center"><img src="docs/assets/proof-banner.svg" alt="Zanshin Proof — Build with agents. Release with evidence." width="100%"></p>
+
 # Zanshin Proof
 
-Evidence gates for calibrated AI decisions.
+**An evaluation workspace for people and coding agents.**
+
+[Quickstart](#try-the-workspace) · [Workspace guide](docs/agent-workspace.md) ·
+[Agent onboarding](.agents-onboarding/index.md) · [Architecture](docs/architecture.md)
+
+Evaluate a model, save the evidence, compare runs, and review what meets your release policy.
+Proof brings persistent evaluation history and a portable visual workspace to its deterministic
+release gates. Every saved run links the policy, metrics, model version, code, and source provenance.
+
+![Zanshin Proof workspace with three synthetic evaluations, two passing runs, and one blocked regression.](docs/assets/proof-workspace.webp)
+
+*The working workspace with synthetic demo data. Track evaluations, compare candidates, and
+inspect the checks behind each verdict.*
+
+## See the workflow
+
+![A twelve-second tour of the real workspace: view evaluation history, compare a regression against the baseline, and inspect the required check that blocks release. Synthetic demonstration.](docs/assets/proof-workflow.gif)
+
+**Track → compare → inspect.** This recorded sequence uses the runnable synthetic demo below.
+The regression scores AUC `0.70`, below the policy floor of `0.807`, so its required check blocks
+release. [Open the static workspace screenshot](docs/assets/proof-workspace.webp) if you prefer
+an image without animation.
+
+## How Proof reaches a verdict
+
+![Observed metrics and provenance plus a versioned release policy enter deterministic checks. Passing and warning runs go to human review; a required failure blocks release and must be fixed and re-evaluated.](docs/assets/proof-concept.svg)
+
+The policy determines the verdict. People own the release decision. A passing gate supplies
+evidence for review; it does not approve or deploy a model.
+
+| Evaluate | Track & compare | Review |
+| --- | --- | --- |
+| Apply explicit YAML policies to measured evidence. | Save evaluations, follow parent runs, and compare metrics. | Inspect checks, policy snapshots, and provenance in your browser. |
+
+## Try the workspace
+
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or newer.
+
+```bash
+git clone https://github.com/zanshin-ai/zanshin-proof.git
+cd zanshin-proof
+uv sync --extra dev --locked
+uv run python examples/workspace/make_demo.py
+```
+
+Open `proof-workspace.html`. The demo records three **synthetic** evaluations, including a blocked
+regression, in `.proof/demo.db`. It demonstrates tracking and review; it runs no model training.
+
+For your own evidence:
+
+```bash
+uv run zanshin-proof evaluate \
+  --policy examples/recommendation/policy.yml \
+  --evidence examples/recommendation/evidence.json \
+  --store .proof/runs.db --actor agent:codex
+
+uv run zanshin-proof runs list
+uv run zanshin-proof workspace
+```
+
+Use `runs show RUN_ID`, `runs compare BASELINE_ID CANDIDATE_ID`, and `evaluate --parent RUN_ID`
+to inspect and link runs. Read the [workspace guide](docs/agent-workspace.md) for exact commands,
+storage and export details, trust boundaries, and the lifecycle roadmap.
+
+## Start with your coding agent
+
+Paste this into your coding assistant:
+
+```text
+Read https://raw.githubusercontent.com/zanshin-ai/zanshin-proof/main/.agents-onboarding/index.md
+and help me evaluate my model, track its evidence, and compare it with a baseline.
+```
+
+The working product covers evaluation, local run history, comparison, and review. Training
+orchestration, a hosted multi-user app, model deployment, and production monitoring remain
+planned capabilities. Actor labels are self-reported; a passing gate is not human approval.
+
+## Evidence gates for calibrated AI decisions
 
 Zanshin Proof helps teams evaluate and release probabilistic decision systems, including
 models trained with Reinforcement Learning for Calibrated Decisions (RLCD). It checks
@@ -37,6 +116,9 @@ The repository currently supports:
 - A recommendation-model example
 - Draft 2020-12 JSON Schemas for policies, evidence, and reports
 - Required provenance binding evidence to code, model, run, source, and collection time
+- Persistent SQLite evaluation history with actor labels, parent runs, and snapshot digests
+- JSON run inspection and metric comparisons that flag changed policies
+- A self-contained HTML workspace with search, filters, evidence review, and report downloads
 
 ## Try it: evaluate decision outputs
 
@@ -127,4 +209,5 @@ schemas are packaged under `src/zanshin_proof/schemas/` and enforced at runtime.
 2. Optional Jev and LangChain evidence collectors
 3. Signed evidence bundles and GitHub pull-request checks
 4. MLflow and Databricks provenance collectors
-5. Human approval workflow and review UI
+5. Authenticated human approval workflow and shared review app
+
