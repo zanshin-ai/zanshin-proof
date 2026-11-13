@@ -22,8 +22,10 @@ inspect the checks behind each verdict.*
 
 **Track → compare → inspect.** This recorded sequence uses the runnable synthetic demo below.
 The regression scores AUC `0.70`, below the policy floor of `0.807`, so its required check blocks
-release. [Open the static workspace screenshot](docs/assets/proof-workspace.webp) if you prefer
-an image without animation.
+release. That floor comes from the evidence baseline (`0.812`) minus the allowed drop (`0.005`).
+Comparing saved runs changes the displayed deltas; it does not re-evaluate their gates.
+[Open the static workspace screenshot](docs/assets/proof-workspace.webp) if you prefer an image
+without animation.
 
 ## How Proof reaches a verdict
 
@@ -32,13 +34,10 @@ an image without animation.
 The policy determines the verdict. People own the release decision. A passing gate supplies
 evidence for review; it does not approve or deploy a model.
 
-| Evaluate | Track & compare | Review |
-| --- | --- | --- |
-| Apply explicit YAML policies to measured evidence. | Save evaluations, follow parent runs, and compare metrics. | Inspect checks, policy snapshots, and provenance in your browser. |
-
 ## Try the workspace
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or newer.
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or newer. From a POSIX shell
+(macOS, Linux, or WSL):
 
 ```bash
 git clone https://github.com/zanshin-ai/zanshin-proof.git
@@ -47,10 +46,13 @@ uv sync --extra dev --locked
 uv run python examples/workspace/make_demo.py
 ```
 
-Open `proof-workspace.html`. The demo records three **synthetic** evaluations, including a blocked
-regression, in `.proof/demo.db`. It demonstrates tracking and review; it runs no model training.
+Open `proof-workspace.html`. The demo saves three **synthetic** evaluations, including a
+blocked regression, in `.proof/demo.db`. Repeated runs append three more evaluations.
+It demonstrates evaluation history and review; it performs no model training.
 
-For your own evidence:
+### Save an evaluation
+
+After setup, evaluate the included recommendation fixture and save it in your own workspace:
 
 ```bash
 uv run zanshin-proof evaluate \
@@ -62,9 +64,121 @@ uv run zanshin-proof runs list
 uv run zanshin-proof workspace
 ```
 
-Use `runs show RUN_ID`, `runs compare BASELINE_ID CANDIDATE_ID`, and `evaluate --parent RUN_ID`
-to inspect and link runs. Read the [workspace guide](docs/agent-workspace.md) for exact commands,
-storage and export details, trust boundaries, and the lifecycle roadmap.
+This fixture returns `warn` with exit code `0`: its optional catalog-coverage check misses
+the threshold. The three-run visual demo uses different synthetic metrics. The report is JSON
+on stdout; the saved workspace run ID is printed on stderr.
+
+For a real evaluation, replace the sample policy and evidence with your own versioned policy,
+measured results, independently established facts, and actual provenance. Actor labels are
+self-reported attribution. The [workspace guide](docs/agent-workspace.md) covers run IDs,
+parent runs, comparison, database paths, and export limits.
+
+## Choose your input
+
+| Input | What Proof does | Contract |
+| --- | --- | --- |
+| `evaluate --evidence evidence.json` | Validate supplied facts, metrics, and provenance; apply the policy. | [Evidence v1 schema](src/zanshin_proof/schemas/evidence.schema.json) |
+| `evaluate --decisions decisions.json` | Compute metrics from labeled binary outputs, then apply the policy. | [Decision records and metric definitions](docs/decision-records.md) |
+
+Use exactly one input option. For labeled binary records, Proof computes accuracy, binary Brier
+score, top-label ECE and bins, automation coverage, and selective error. Paired baseline
+probabilities and candidate latency are optional inputs; a policy can require their resulting
+metrics. Precomputed evidence can carry other numeric metrics, including AUC.
+
+To try the labeled-record path after setup:
+
+```bash
+uv run python examples/calibrated-decisions/make_demo.py --decisions > /tmp/decisions.json
+uv run zanshin-proof evaluate \
+  --policy examples/calibrated-decisions/policy.yml \
+  --decisions /tmp/decisions.json \
+  --evidence-output /tmp/decision-evidence.json \
+  --output /tmp/decision-report.json
+```
+
+Expected: `pass`, nine passing checks, exit code `0`. The records are synthetic.
+Follow the [working example](docs/working-example.md) to inspect the metrics, produce a blocked
+variant, and adapt the input to your model.
+
+## Policy example
+
+This is the complete [recommendation policy](examples/recommendation/policy.yml) used by the
+workspace demo. Thresholds illustrate the mechanics; choose values appropriate to your model
+and evaluation set.
+
+```yaml
+version: 1
+project: recommendation-ranking
+
+# Illustrative thresholds, not production defaults. Required failures block release.
+checks:
+  - id: schema-compatible
+    type: boolean
+    required: true
+    description: Candidate features remain compatible with serving.
+    path: facts.schema_compatible
+
+  - id: reproducible-training
+    type: boolean
+    required: true
+    description: The candidate can be reproduced from pinned inputs.
+    path: facts.reproducible_training
+
+  - id: auc-regression
+    type: metric_regression
+    required: true
+    description: AUC cannot fall more than five thousandths below baseline.
+    candidate: metrics.candidate.auc
+    baseline: metrics.baseline.auc
+    tolerance: 0.005
+
+  - id: calibration-error
+    type: max_value
+    required: true
+    description: Expected calibration error must remain below the release threshold.
+    path: metrics.candidate.ece
+    maximum: 0.03
+
+  - id: catalog-coverage
+    type: min_value
+    required: false
+    description: A coverage miss should be visible but does not yet block release.
+    path: metrics.candidate.catalog_coverage
+    minimum: 0.65
+```
+
+Required failures or missing required metrics block release. Optional failures produce warnings.
+`required` defaults to `true`; it is explicit here so the difference is visible.
+The regression check requires `candidate >= baseline - tolerance`; use `max_value` for an
+upper-bound metric such as latency. Boolean checks inspect supplied facts; they do not independently
+verify feature compatibility or reproduce training.
+
+## Verdicts and exit codes
+
+| Evaluation result | Meaning | Exit code |
+| --- | --- | --- |
+| `pass` | All checks passed. | `0` |
+| `warn` | Required checks passed; an optional check failed or errored. | `0` |
+| `fail` (shown as **Blocked** in the workspace) | A required check failed or errored. | `1` |
+| Configuration or operation error | Invalid input or an operation such as saving output failed. | `2` |
+
+Read and export commands return `0` when the operation succeeds, even if a saved run is blocked.
+Use the report's verdict or the exit code from `evaluate` for gating. A passing gate is evidence
+for a human-owned release process.
+
+## Commands
+
+| Command after `uv run zanshin-proof` | Purpose |
+| --- | --- |
+| `evaluate` | Apply a policy; optionally save the evaluation with `--store`. |
+| `runs list` | List saved run summaries; filter by `--project` or bound results with `--limit`. |
+| `runs show RUN_ID` | Inspect the full policy, evidence, report, and provenance snapshot. |
+| `runs compare BASELINE_ID CANDIDATE_ID` | Show numeric deltas for same-project runs and flag changed policies. |
+| `workspace` | Export a self-contained HTML review workspace. |
+
+Read/export commands default to `.proof/runs.db`. Run IDs refer to workspace evaluations, not
+the originating training system's IDs. Use `--help` on any command for its exact options.
+The HTML is an offline snapshot; re-export to include new runs.
 
 ## Start with your coding agent
 
@@ -75,139 +189,50 @@ Read https://raw.githubusercontent.com/zanshin-ai/zanshin-proof/main/.agents-onb
 and help me evaluate my model, track its evidence, and compare it with a baseline.
 ```
 
-The working product covers evaluation, local run history, comparison, and review. Training
-orchestration, a hosted multi-user app, model deployment, and production monitoring remain
-planned capabilities. Actor labels are self-reported; a passing gate is not human approval.
+Agents use the same CLI and deterministic policy engine. They can collect evidence and inspect
+results; an actor label or a model's claim of success does not approve a release.
 
-## Evidence gates for calibrated AI decisions
+## Evidence and trust
 
-Zanshin Proof helps teams evaluate and release probabilistic decision systems, including
-models trained with Reinforcement Learning for Calibrated Decisions (RLCD). It checks
-observed facts and metrics against an explicit release policy. It gives
-humans a compact evidence packet and gives CI a deterministic decision: pass, warn, or block.
-Agents can help create code and collect evidence, but they do not approve their own work.
+Every evidence document must identify a full Git commit SHA, model name and version, originating
+run, collector, collection timestamp, and at least one versioned source. Reports preserve the
+supplied provenance. Packaged JSON Schemas enforce its presence and shape, not its authenticity.
 
-## Where Proof fits
+Saved runs contain normalized policy, evidence, and report snapshots with SHA-256 digests.
+These local hashes detect accidental changes; they are not signatures. Exported HTML embeds
+full evidence and provenance. Review its contents before sharing.
 
-Use Proof to gate a classifier, model router, or agent decision layer on evidence of
-calibration, decision quality, automation coverage, and latency. Models supply predictions;
-collectors supply observed labels; Proof computes metrics and applies explicit policy.
+## Current scope and planned capabilities
 
-Proof is an evaluation and release-gating tool for RLCD-based systems. It does not train
-RLCD models or provide a live Jev integration. Binary labeled outputs can be evaluated
-directly; precomputed ML evidence is also supported.
-Existing ML release policies remain supported.
+Proof currently provides deterministic evaluation, binary metric computation, local SQLite
+history, JSON run comparison, and offline visual review. Training orchestration, model
+deployment, production monitoring, multiclass scoring, live provider collectors, authenticated
+actors, and approval enforcement are not implemented.
 
-See [Proof for calibrated decisions](docs/calibrated-decisions.md) for the evidence contract,
-Jev and LangChain context, limitations, and integration roadmap.
+See the [capability roadmap](docs/agent-workspace.md#product-direction) for planned extensions
+and the [architecture](docs/architecture.md) for system boundaries.
 
-## First working slice
+## Development
 
-The repository currently supports:
-
-- Versioned YAML release policies
-- Required and optional checks
-- Boolean assertions, regression tolerances, and numeric thresholds
-- Binary decision metrics: Brier score, top-label ECE, accuracy, selective error, coverage
-- Optional paired baseline metrics, latency p95, and inspectable calibration bins
-- Machine-readable JSON reports
-- CI-safe exit codes
-- A calibrated-decision policy with a runnable, explicitly synthetic demonstration
-- A recommendation-model example
-- Draft 2020-12 JSON Schemas for policies, evidence, and reports
-- Required provenance binding evidence to code, model, run, source, and collection time
-- Persistent SQLite evaluation history with actor labels, parent runs, and snapshot digests
-- JSON run inspection and metric comparisons that flag changed policies
-- A self-contained HTML workspace with search, filters, evidence review, and report downloads
-
-## Try it: evaluate decision outputs
-
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or newer. From a terminal:
+After setup:
 
 ```bash
-git clone https://github.com/zanshin-ai/zanshin-proof.git
-cd zanshin-proof
-uv sync --extra dev --locked
-
-uv run python examples/calibrated-decisions/make_demo.py --decisions > /tmp/decisions.json
-uv run zanshin-proof evaluate \
-  --policy examples/calibrated-decisions/policy.yml \
-  --decisions /tmp/decisions.json \
-  --evidence-output /tmp/decision-evidence.json \
-  --output /tmp/decision-report.json
+uv run pytest
+uv run ruff check .
+uv build
 ```
 
-Expected: `pass`, nine passing checks, exit code `0`. Proof computes metrics from 100
-synthetic labeled records: accuracy `0.99`, Brier score approximately `0.0099`, ECE `0`,
-coverage `1`, selective error `0.01`, and p95 latency `180` ms. These demonstrate the
-calculation, not real model performance.
+CI checks tests, lint, package builds, packaged HTML, and runnable examples. The separate
+README-visuals workflow captures the real synthetic demo and checks desktop and phone layouts.
 
-Follow the [working example walkthrough](docs/working-example.md) to inspect the output,
-make a required gate fail, and adapt the input to your own model. The
-[decision-record contract](docs/decision-records.md) defines every metric and input field.
+## Documentation
 
-## Evaluate precomputed evidence
-
-From the same checkout:
-
-```bash
-uv run zanshin-proof evaluate \
-  --policy examples/recommendation/policy.yml \
-  --evidence examples/recommendation/evidence.json \
-  --output /tmp/recommendation-report.json
-```
-
-This older example returns `warn` for catalog coverage with exit code `0`. Exit code `1`
-means a required check blocks release; `2` means invalid input or an output-write error.
-Use `uv run pytest`, `uv run ruff check .`, and `uv build` for verification and packaging.
-
-## Policy example
-
-```yaml
-version: 1
-project: recommendation-ranking
-checks:
-  - id: auc-regression
-    type: metric_regression
-    candidate: metrics.candidate.auc
-    baseline: metrics.baseline.auc
-    tolerance: 0.005
-
-  - id: calibration-error
-    type: max_value
-    path: metrics.candidate.ece
-    maximum: 0.03
-```
-
-## Design principles
-
-- Explicit intent before execution
-- Deterministic gates over agent self-assessment
-- Independent evidence with provenance
-- Required failures cannot be explained away
-- Human ownership of promotion and approval
-- Durable architecture documentation instead of disposable agent notes
-
-See [docs/architecture.md](docs/architecture.md) for system boundaries and planned integrations.
-
-## Evidence provenance
-
-Every evidence document must identify:
-
-- The complete Git commit SHA evaluated
-- The model name and version
-- The originating run system and run ID
-- The collector and collection timestamp
-- At least one versioned source table, dataset, file, API, or manual input
-
-This provenance is validated before any checks run and is copied unchanged into the report. The
-schemas are packaged under `src/zanshin_proof/schemas/` and enforced at runtime.
-
-## Near-term roadmap
-
-1. Multiclass metrics, evaluation slices, and uncertainty bounds
-2. Optional Jev and LangChain evidence collectors
-3. Signed evidence bundles and GitHub pull-request checks
-4. MLflow and Databricks provenance collectors
-5. Authenticated human approval workflow and shared review app
+| Guide | Use it for |
+| --- | --- |
+| [Workspace guide](docs/agent-workspace.md) | Persistence, lineage, comparison, exports, and current limits. |
+| [Working example](docs/working-example.md) | A complete labeled-decision walkthrough, including a blocked variant. |
+| [Decision records](docs/decision-records.md) | Input fields and exact metric definitions. |
+| [Calibrated decisions](docs/calibrated-decisions.md) | Calibration and decision-routing use cases, including RLCD context. |
+| [Architecture](docs/architecture.md) | Evaluation boundaries, provenance, and planned integration seams. |
+| [Visual assets](docs/assets/README.md) | Reproduce the README screenshot and animation. |
 

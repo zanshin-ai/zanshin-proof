@@ -1,19 +1,23 @@
 version: 1
 project: recommendation-ranking
 
+# Illustrative thresholds, not production defaults. Required failures block release.
 checks:
   - id: schema-compatible
     type: boolean
+    required: true
     description: Candidate features remain compatible with serving.
     path: facts.schema_compatible
 
   - id: reproducible-training
     type: boolean
+    required: true
     description: The candidate can be reproduced from pinned inputs.
     path: facts.reproducible_training
 
   - id: auc-regression
     type: metric_regression
+    required: true
     description: AUC cannot fall more than five thousandths below baseline.
     candidate: metrics.candidate.auc
     baseline: metrics.baseline.auc
@@ -21,6 +25,7 @@ checks:
 
   - id: calibration-error
     type: max_value
+    required: true
     description: Expected calibration error must remain below the release threshold.
     path: metrics.candidate.ece
     maximum: 0.03
@@ -31,3 +36,4 @@ checks:
     description: A coverage miss should be visible but does not yet block release.
     path: metrics.candidate.catalog_coverage
     minimum: 0.65
+
