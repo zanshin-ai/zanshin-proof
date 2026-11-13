@@ -16,6 +16,16 @@ The first vertical slice has five parts:
 4. A deterministic engine evaluates each check without model judgment.
 5. The CLI validates and emits a JSON report with the original provenance attached.
 
+An optional workspace adds SQLite snapshots of the normalized policy, evidence, and computed
+report. Evaluation still uses the same engine. Each run gets a local workspace ID, actual
+recording time, self-reported actor, optional same-project parent, and snapshot SHA-256 digests.
+Reads verify those digests and never create a missing database. Public write operations append;
+there is no edit, delete, approve, promote, train, or deploy operation.
+
+CLI inspection and comparison return JSON. An offline HTML export supplies a visual review
+workspace, built from the stored records with no external assets or runtime server. It is a
+snapshot, not a live multi-user app. See [the workspace guide](agent-workspace.md).
+
 Exit code `0` means the release is not blocked, `1` means required evidence failed, and `2`
 means the input could not be safely interpreted.
 
@@ -38,6 +48,7 @@ it. Computed evidence records the method, settings, and canonical input hash und
 - Approval identities and separation-of-duties rules
 - Signed evidence bundles and immutable audit storage
 - Pull-request check reporting and a human review UI
+- Training/external tracker adapters, model registry and deployment integration, monitoring
 
 ## Calibrated decision systems
 
@@ -46,3 +57,4 @@ calibration, selective error, coverage, and latency metrics. No model participat
 policy evaluation. The binary decision adapter is a separate deterministic component; live provider collectors
 remain future work. The existing evidence, report, and policy schemas are unchanged. See the
 [decision evidence contract](calibrated-decisions.md) for definitions and limitations.
+

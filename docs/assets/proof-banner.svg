@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-labelledby="title desc">
+<title id="title">Zanshin Proof</title><desc id="desc">Build with agents. Release with evidence. Evaluate, track, compare, and review.</desc>
+<rect width="1200" height="380" rx="18" fill="#0c1111"/>
+<g fill="none" stroke="#243433"><path d="M650 0v380M730 0v380M810 0v380M890 0v380M970 0v380M1050 0v380M1130 0v380M570 70h630M570 150h630M570 230h630M570 310h630"/></g>
+<circle cx="66" cy="64" r="20" fill="none" stroke="#d6f49b"/><text x="59" y="71" font-family="system-ui,sans-serif" font-size="20" fill="#d6f49b">Z</text>
+<text x="100" y="71" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#eef4ef">ZANSHIN PROOF</text>
+<text x="46" y="157" font-family="system-ui,sans-serif" font-size="44" font-weight="600" letter-spacing="-1" fill="#eef4ef">Build with agents.</text>
+<text x="46" y="215" font-family="system-ui,sans-serif" font-size="44" font-weight="600" letter-spacing="-1" fill="#d6f49b">Release with evidence.</text>
+<text x="48" y="274" font-family="system-ui,sans-serif" font-size="17" fill="#9caeac">An evaluation workspace for people and coding agents.</text>
+<text x="48" y="330" font-family="system-ui,sans-serif" font-size="12" letter-spacing="2" fill="#9caeac">EVALUATE / TRACK / COMPARE / REVIEW</text>
+<rect x="705" y="88" width="405" height="202" rx="12" fill="#121a1a" stroke="#3b4c45"/>
+<text x="733" y="126" font-family="system-ui,sans-serif" font-size="13" fill="#9caeac">RELEASE EVIDENCE</text>
+<path d="M733 144h350" stroke="#293535"/>
+<g font-family="system-ui,sans-serif" font-size="15" fill="#eef4ef"><text x="733" y="177">Versioned policy</text><text x="733" y="215">Observed metrics</text><text x="733" y="253">Original provenance</text></g>
+<g fill="#d6f49b"><circle cx="1068" cy="172" r="4"/><circle cx="1068" cy="210" r="4"/><circle cx="1068" cy="248" r="4"/></g>
+</svg>
