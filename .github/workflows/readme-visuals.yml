@@ -1,0 +1,32 @@
+name: README visuals
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - examples/workspace/capture_readme.py
+      - src/zanshin_proof/workspace.html
+      - .github/workflows/readme-visuals.yml
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.33"
+          enable-cache: true
+      - run: uv python install 3.12
+      - run: uv sync --extra dev --locked
+      - run: uv run --with playwright --with Pillow python -m playwright install --with-deps chromium
+      - name: Capture and verify synthetic workspace
+        run: uv run --with playwright --with Pillow python examples/workspace/capture_readme.py --emit-base64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: readme-visuals
+          path: /tmp/proof-readme-assets/
