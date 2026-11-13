@@ -17,7 +17,7 @@ import tempfile
 import threading
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -62,7 +62,10 @@ def main() -> None:
                 page.locator("#baseline").select_option(ids["synthetic-baseline"])
                 page.locator("#candidate").select_option(ids["synthetic-regression"])
                 assert page.locator("#comparison").get_by_text("BLOCKED", exact=True).count() == 1
-                frames.append(page.screenshot())
+                assert page.locator("#comparison .table-wrap").evaluate(
+                    "el => el.scrollWidth <= el.clientWidth"
+                )
+                frames.append(page.locator("#compare").screenshot())
 
                 page.get_by_role("link", name="Evaluation runs", exact=True).click()
                 page.locator("#run-rows tr").filter(has_text="synthetic-regression").get_by_role(
@@ -75,7 +78,7 @@ def main() -> None:
                     ".getBoundingClientRect().top + scrollY - 20, "
                     "document.documentElement.scrollHeight - innerHeight)) < 2"
                 )
-                frames.append(page.screenshot())
+                frames.append(page.locator("#evidence").screenshot())
                 assert not errors, errors
 
                 # Also verify the real layout at a phone width.
@@ -98,9 +101,9 @@ def main() -> None:
             else ImageFont.load_default())
     animation = []
     for image, label in zip(images, labels, strict=True):
-        image = image.resize((1008, 700), Image.Resampling.LANCZOS)
+        image = ImageOps.contain(image, (1008, 700), Image.Resampling.LANCZOS)
         canvas = Image.new("RGB", (1008, 754), "#0c1111")
-        canvas.paste(image, (0, 54))
+        canvas.paste(image, ((1008 - image.width) // 2, 54 + (700 - image.height) // 2))
         draw = ImageDraw.Draw(canvas)
         draw.text((18, 17), label, fill="#d6f49b", font=font)
         draw.text((810, 17), "Synthetic demo", fill="#9caeac", font=font)
