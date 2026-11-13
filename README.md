@@ -11,9 +11,30 @@ Evaluate a model, save the evidence, compare runs, and review what meets your re
 Proof brings persistent evaluation history and a portable visual workspace to its deterministic
 release gates. Every saved run links the policy, metrics, model version, code, and source provenance.
 
+![Zanshin Proof workspace with three synthetic evaluations, two passing runs, and one blocked regression.](docs/assets/proof-workspace.webp)
+
+*The working workspace with synthetic demo data. Track evaluations, compare candidates, and
+inspect the checks behind each verdict.*
+
+## See the workflow
+
+![A twelve-second tour of the real workspace: view evaluation history, compare a regression against the baseline, and inspect the required check that blocks release. Synthetic demonstration.](docs/assets/proof-workflow.gif)
+
+**Track → compare → inspect.** This recorded sequence uses the runnable synthetic demo below.
+The regression scores AUC `0.70`, below the policy floor of `0.807`, so its required check blocks
+release. [Open the static workspace screenshot](docs/assets/proof-workspace.webp) if you prefer
+an image without animation.
+
+## How Proof reaches a verdict
+
+![Observed metrics and provenance plus a versioned release policy enter deterministic checks. Passing and warning runs go to human review; a required failure blocks release and must be fixed and re-evaluated.](docs/assets/proof-concept.svg)
+
+The policy determines the verdict. People own the release decision. A passing gate supplies
+evidence for review; it does not approve or deploy a model.
+
 | Evaluate | Track & compare | Review |
 | --- | --- | --- |
-| Compute metrics or bring existing evidence; apply explicit YAML policies. | Save runs from people or agents, follow parent runs, and inspect metric deltas. | Open a local browser workspace with checks, policy snapshots, provenance, and report downloads. |
+| Apply explicit YAML policies to measured evidence. | Save evaluations, follow parent runs, and compare metrics. | Inspect checks, policy snapshots, and provenance in your browser. |
 
 ## Try the workspace
 

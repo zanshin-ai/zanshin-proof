@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+<title id="title">How Zanshin Proof turns evidence into a release decision</title>
+<desc id="desc">Observed evidence and a versioned policy enter deterministic checks. Pass and warn verdicts go to human review. A required failure blocks release and needs correction and re-evaluation. A pass is not approval.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="none" stroke="#718780" stroke-width="1.5"/></marker><marker id="green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="none" stroke="#d6f49b" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="520" rx="16" fill="#0c1111"/>
+<g font-family="system-ui,-apple-system,sans-serif">
+<text x="44" y="54" font-size="12" letter-spacing="2" fill="#d6f49b">THE PROOF WORKFLOW</text>
+<text x="44" y="94" font-size="30" font-weight="600" fill="#eef4ef">Evidence in. A clear decision out.</text>
+<g fill="none" stroke="#718780" stroke-width="2" marker-end="url(#arrow)">
+<path d="M294 191H344V251H404"/><path d="M294 324H344V251"/>
+<path d="M684 251H739V175H790"/><path d="M739 251H790"/><path d="M739 251V327H790"/>
+<path d="M890 356V381H550V406"/><path d="M420 436H366V266H404"/>
+</g>
+<g fill="none" stroke="#d6f49b" stroke-width="2" marker-end="url(#green)"><path d="M990 175H1090V437H990"/><path d="M990 251H1090"/></g>
+<rect x="44" y="144" width="250" height="95" rx="9" fill="#121a1a" stroke="#31443b"/>
+<text x="64" y="176" font-size="17" font-weight="600" fill="#eef4ef">Observed evidence</text>
+<text x="64" y="204" font-size="13" fill="#9caeac">Metrics · model · code · sources</text>
+<rect x="44" y="277" width="250" height="95" rx="9" fill="#121a1a" stroke="#31443b"/>
+<text x="64" y="309" font-size="17" font-weight="600" fill="#eef4ef">Your release policy</text>
+<text x="64" y="337" font-size="13" fill="#9caeac">Thresholds · required checks</text>
+<rect x="404" y="197" width="280" height="108" rx="12" fill="#1d2b23" stroke="#87a266"/>
+<text x="544" y="230" text-anchor="middle" font-size="12" letter-spacing="2" fill="#d6f49b">ZANSHIN PROOF</text>
+<text x="544" y="260" text-anchor="middle" font-size="19" font-weight="600" fill="#eef4ef">Deterministic checks</text>
+<text x="544" y="283" text-anchor="middle" font-size="12" fill="#9caeac">Save the policy, evidence, and report</text>
+<rect x="790" y="147" width="200" height="56" rx="8" fill="#263425" stroke="#415938"/>
+<text x="810" y="171" font-size="13" font-weight="600" fill="#d6f49b">PASS</text><text x="810" y="190" font-size="11" fill="#b5c7b7">Checks satisfied</text>
+<rect x="790" y="223" width="200" height="56" rx="8" fill="#342f22" stroke="#675a3a"/>
+<text x="810" y="247" font-size="13" font-weight="600" fill="#f4d48c">WARN</text><text x="810" y="266" font-size="11" fill="#cec0a2">Optional check needs attention</text>
+<rect x="790" y="299" width="200" height="56" rx="8" fill="#352623" stroke="#69443c"/>
+<text x="810" y="323" font-size="13" font-weight="600" fill="#ffaca1">BLOCKED</text><text x="810" y="342" font-size="11" fill="#cfaaa3">Required check failed or errored</text>
+<rect x="420" y="406" width="260" height="60" rx="8" fill="#121a1a" stroke="#3a4540"/>
+<text x="550" y="432" text-anchor="middle" font-size="15" fill="#eef4ef">Fix &amp; re-evaluate</text><text x="550" y="453" text-anchor="middle" font-size="11" fill="#9caeac">A required failure stays blocked</text>
+<rect x="790" y="406" width="200" height="60" rx="8" fill="#121a1a" stroke="#87a266"/>
+<text x="890" y="432" text-anchor="middle" font-size="15" fill="#eef4ef">Human review</text><text x="890" y="453" text-anchor="middle" font-size="11" fill="#9caeac">A pass is evidence, not approval</text>
+<text x="44" y="490" font-size="11" fill="#9caeac">Agents can collect evidence. The policy determines the verdict. People own the release decision.</text>
+</g></svg>
